@@ -97,6 +97,21 @@
   .next-btn{display:block;width:100%;margin-top:10px;padding:12px;border:none;border-radius:14px;background:#43A047;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
   .next-btn:hover{background:#388E3C;}
 
+  /* 釘在容器底部的回首頁列 */
+  .home-dock{
+    display:flex;justify-content:center;gap:10px;
+    margin-top:16px;padding-top:14px;
+    border-top:2px dashed #C5E1A5;
+  }
+  .home-link{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 22px;border-radius:20px;
+    border:2px solid #A5D6A7;background:#fff;color:#388E3C;
+    font-size:.88rem;font-weight:700;cursor:pointer;text-decoration:none;
+    transition:all .15s;
+  }
+  .home-link:hover{background:#E8F5E9;transform:translateY(-1px);box-shadow:0 3px 8px rgba(76,175,80,.2);}
+
   #resultPage{text-align:center;padding:14px 0;}
   .result-emoji{font-size:2.8rem;margin-bottom:6px;}
   .result-score{font-size:1.8rem;font-weight:800;color:#2E7D32;margin:6px 0;}
@@ -158,6 +173,7 @@
     <div class="opts" id="opts"></div>
     <div id="feedback"></div>
     <button class="next-btn" id="nextBtn" style="display:none" onclick="nextQuestion()">下一題 →</button>
+    <div class="home-dock"><button class="home-link" onclick="confirmHome()">🏠 回到主頁</button></div>
   </div>
 
   <!-- 結算頁 -->
@@ -171,6 +187,7 @@
       <button class="btn alt" onclick="startGame()">🔄 再玩一次</button>
       <button class="btn" onclick="goHome()">🏠 換難度</button>
     </div>
+    <div class="home-dock"><button class="home-link" onclick="goHome()">🏠 回到主頁</button></div>
   </div>
 </div>
 
@@ -269,6 +286,25 @@ function startGame(){
   renderQuestion();
 }
 function goHome(){show("homePage");updateBar();}
+
+let homePending=false;
+function confirmHome(){
+  // 還沒開始答題或已經答到最後，直接回
+  if(!answered||qi>=19){goHome();return;}
+  if(homePending){ // 第二次按 = 確定放棄
+    goHome();homePending=false;return;
+  }
+  homePending=true;
+  const btn=document.querySelector(".home-dock .home-link");
+  const orig=btn.innerHTML;
+  btn.innerHTML="⚠️ 再按一次確定放棄這局";
+  btn.style.borderColor="#FFB74D";btn.style.color="#E65100";
+  setTimeout(()=>{if(homePending){homePending=false;btn.innerHTML=orig;btn.style.borderColor="";btn.style.color="";}},3000);
+  // 回答後按下一題時自動重置旗標
+  const obs=setInterval(()=>{
+    if(!answered){clearInterval(obs);homePending=false;btn.innerHTML=orig;btn.style.borderColor="";btn.style.color="";}
+  },500);
+}
 
 function show(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
